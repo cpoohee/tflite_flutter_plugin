@@ -1,3 +1,5 @@
+//ADDITIONAL CODES
+
 import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
@@ -101,11 +103,26 @@ typedef _TfLiteTensorCopyToBuffer_native_t = /*TfLiteStatus*/ Int32 Function(
   Int32 outputDataSize,
 );
 
-TfLiteQuantizationParams Function(Pointer<TfLiteTensor> tensor)
+Pointer<TfLiteQuantizationParams> Function(Pointer<TfLiteTensor> tensor)
     tfLiteTensorQuantizationParams = tflitelib
         .lookup<NativeFunction<_TfLiteTensorQuantizationParams_native_t>>(
-            'TfLiteTensorQuantizationParams')
+            'TfLiteTensorQuantizationParamsPointer')
         .asFunction();
 
 typedef _TfLiteTensorQuantizationParams_native_t
-    = TfLiteQuantizationParams Function(Pointer<TfLiteTensor> tensor);
+    = Pointer<TfLiteQuantizationParams> Function(Pointer<TfLiteTensor> tensor);
+
+
+// ADDITIONAL CODES
+// add missing realloc tensor call
+void Function(
+    int num_bytes,
+    Pointer<TfLiteTensor> tensor)
+    tfLiteTensorRealloc = tflitelib
+        .lookup<NativeFunction<_TfLiteTensorRealloc_native_t>>(
+            'TfLiteTensorRealloc')
+        .asFunction();
+typedef _TfLiteTensorRealloc_native_t = Void Function(
+    Int32 num_bytes,
+    Pointer<TfLiteTensor> tensor );
+// END ADDITIONAL CODES

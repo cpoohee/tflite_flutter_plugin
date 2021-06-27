@@ -1,6 +1,14 @@
+// ADDITIONAL CODES
+
 import 'dart:typed_data';
 import 'list_shape_extension.dart';
 import 'package:tflite_flutter/src/bindings/types.dart';
+
+// ADDITIONAL CODES
+import 'dart:convert' show utf8;
+import 'dart:ffi';
+//import 'dart:developer' as developer;
+// END ADDITIONAL CODES
 
 class ByteConversionUtils {
   static Uint8List convertObjectToBytes(Object o, TfLiteType tfliteType) {
@@ -11,6 +19,17 @@ class ByteConversionUtils {
       return o.asUint8List();
     }
     List<int> bytes = <int>[];
+
+    // ADDITIONAL CODES
+    // special case for string
+    if (tfliteType == TfLiteType.string){
+      //developer.log('Converting string:');
+      //developer.log(o.toString());
+      bytes = _convertElementToBytes(o, tfliteType); // let _convertElementToBytes handle possible multiple strings
+      return Uint8List.fromList(bytes);
+    }
+    // END ADDITIONAL CODES
+
     if (o is List) {
       for (var e in o) {
         bytes.addAll(convertObjectToBytes(e, tfliteType));
@@ -82,7 +101,19 @@ class ByteConversionUtils {
         throw ArgumentError(
             'The input element is ${o.runtimeType} while tensor data tfliteType is ${TfLiteType.float32}');
       }
-    } else {
+    }
+    //////// ADDITIONAL CODES
+    else if (tfliteType == TfLiteType.string){
+      if (o is String || o is List ) {
+        List<int> fullStringList = encodeTFStrings(o);
+        return Uint8List.fromList(fullStringList);
+      } else{
+        throw ArgumentError(
+            'The input element is ${o.runtimeType} while tensor data tfliteType is ${TfLiteType.string}');
+      }
+    }
+    /////// END ADDITIONAL CODES
+    else {
       throw ArgumentError(
           'The input data tfliteType ${o.runtimeType} is unsupported');
     }
@@ -128,6 +159,110 @@ class ByteConversionUtils {
       }
       return list.reshape<int>(shape);
     }
+    /// ADDITIONAL CODES
+    else if (tfliteType == TfLiteType.string){
+      list.add(decodeTFStrings(bytes));
+      return list.reshape<int>(shape);
+    }
+    // END ADDITIONAL CODES
     throw UnsupportedError("$tfliteType is not Supported.");
   }
+
+  // ADDITIONAL CODES
+  static List<int> encodeTFStrings(Object o){
+    // Following String encoding as listed on
+    // https://github.com/tensorflow/tensorflow/blob/master/tensorflow/lite/string_util.h
+    //
+    // Util methods to read and write String tensors.
+    // String tensors are considered to be char tensor with protocol.
+    //   [0, 3] 4 bytes: N, num of strings in the tensor in little endian.
+    //   [(i+1)*4, (i+1)*4+3] 4 bytes: offset of i-th string in little endian,
+    //                                 for i from 0 to N-1.
+    //   [(N+1)*4, (N+1)*4+3] 4 bytes: length of the whole char buffer.
+    //   [offset(i), offset(i+1) - 1] : content of i-th string.
+    // Example of a string tensor:
+    // [
+    //   2, 0, 0, 0,     # 2 strings.
+    //   16, 0, 0, 0,    # 0-th string starts from index 16.
+    //   18, 0, 0, 0,    # 1-st string starts from index 18.
+    //   18, 0, 0, 0,    # total length of array.
+    //   'A', 'B',       # 0-th string [16..17]: "AB"
+    // ]                 # 1-th string, empty
+
+    List<int> fully_encoded_string = [];
+    List<dynamic> to_encode_list = []; // currently copying strings... hmm
+    int num_string;
+    if (o is List){
+      num_string = o.length; // elements of strings in list
+      to_encode_list.addAll(o);
+    }else{
+      num_string = 1; // let this be only string input
+      to_encode_list.add(o);
+    }
+
+    List<List<int>> encodedStringList = [];
+    for (int i = 0; i < to_encode_list.length; i++){
+      if (to_encode_list.elementAt(i) is String) {
+        List<int> encodedString = utf8.encode(to_encode_list.elementAt(i));
+        encodedStringList.add(encodedString);
+      }
+      else{
+        encodedStringList.add([]); // add blank
+      }
+    }
+    // encode tensor string
+    fully_encoded_string.addAll(encode32BitInt(num_string,Endian.little));  // [0, 3] 4 bytes: N, num of strings in the tensor in little endian.
+    // calculate offset and encode
+    int InitialStringOffset = (1 + num_string + 1)*sizeOf<Int32>(); // N + offsets of strings + totalsection
+    List<int> offsets = [];
+    int accumOffset = InitialStringOffset;
+    for (List<int>encStr in encodedStringList){
+      offsets.add(accumOffset);
+      accumOffset = accumOffset + encStr.length;
+    }
+
+    // for example
+    //   16, 0, 0, 0,    # 0-th string starts from index 16.
+    //   18, 0, 0, 0,    # 1-st string starts from index 18.
+    for (int offset in offsets){
+      fully_encoded_string.addAll(encode32BitInt(offset,Endian.little));
+    }
+
+    // for example
+    //   18, 0, 0, 0,    # total length of array.
+    fully_encoded_string.addAll(encode32BitInt(accumOffset,Endian.little));
+
+    // for example
+    //   'A', 'B',       # 0-th string [16..17]: "AB"
+    // ]                 # 1-th string, empty
+    for (List<int>encStr in encodedStringList){
+      fully_encoded_string.addAll(encStr);
+    }
+    return fully_encoded_string;
+  }
+
+  static List<int> encode32BitInt(int i, Endian e){
+    var buffer32bit = Uint8List(sizeOf<Int32>()).buffer;
+    var bdata32bit = ByteData.view(buffer32bit);
+    bdata32bit.setInt32(0, i, e);
+    return buffer32bit.asUint8List();
+  }
+
+  static List<String> decodeTFStrings(Uint8List bytes){
+    List<String> decodedStrings = [];
+    // get the first 32bit int representing num of strings
+    int num_strings = ByteData.view(bytes.sublist(0,sizeOf<Int32>()).buffer).getInt32(0, Endian.little);
+    // parse subsequent string position and sizes
+    for(int s = 0; s < num_strings; s++){
+      // get curr str index
+      int startIdx = ByteData.view(bytes.sublist((1+s)*sizeOf<Int32>(),(2+s)*sizeOf<Int32>()).buffer).getInt32(0, Endian.little);
+      // get next str index, or in last case the ending byte position
+      int endIdx = ByteData.view(bytes.sublist((2+s)*sizeOf<Int32>(),(3+s)*sizeOf<Int32>()).buffer).getInt32(0, Endian.little);
+      decodedStrings.add(utf8.decode(bytes.sublist(startIdx,endIdx)));
+    }
+    return decodedStrings;
+  }
+
+// END ADDITIONAL CODES
 }
+

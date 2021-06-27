@@ -1,9 +1,16 @@
+/// ADDITIONAL CODES here
 import 'dart:ffi';
 import 'dart:io';
 
 import 'package:quiver/check.dart';
 import '../tflite_flutter.dart';
 import 'bindings/interpreter_options.dart';
+
+/// ADDITIONAL IMPORTS
+import 'bindings/flex_delegate.dart';
+import 'delegates/flex_delegate.dart';
+import 'dart:developer' as developer;
+/// END ADDITIONAL IMPORTS
 
 import 'bindings/types.dart';
 import 'delegate.dart';
@@ -23,6 +30,7 @@ class InterpreterOptions {
 
   /// Destroys the options instance.
   void delete() {
+    developer.log('DELETE DELEGATE');
     checkState(!_deleted, message: 'InterpreterOptions already deleted.');
     tfLiteInterpreterOptionsDelete(_options);
     _deleted = true;
@@ -36,9 +44,20 @@ class InterpreterOptions {
   /// Set true to use NnApi Delegate for Android
   set useNnApiForAndroid(bool useNnApi) {
     if (Platform.isAndroid) {
-      tfLiteInterpreterOptionsSetUseNNAPI(_options, useNnApi ? 1 : 0);
+      tfLiteInterpreterOptionsSetUseNNAPI(_options, 1);
     }
   }
+
+
+  /// ADDITIONAL CODES
+  set useFlexDelegateAndroid(bool useFlexDelegate){
+    if (Platform.isAndroid) {
+      tfLite_flex_initTensorflow();
+      developer.log('INIT FLEX');
+      addDelegate(Flex_Delegate());
+    }
+  }
+  /// END ADDITIONAL CODES
 
   /// Set true to use Metal Delegate for iOS
   set useMetalDelegateForIOS(bool useMetal) {
