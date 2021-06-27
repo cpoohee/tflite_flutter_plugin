@@ -1,8 +1,8 @@
 import 'dart:ffi';
 
-import '../bindings/dlib_flex.dart';
+import '../dlib_flex.dart';
 
-import '../bindings/types.dart';
+import '../types.dart';
 
 // android flex delegate bindings
 Pointer<TfLiteDelegate> Function()
