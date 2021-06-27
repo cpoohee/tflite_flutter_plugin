@@ -51,7 +51,7 @@ interpreter.close();
 
 More details on Flex support: 
 
-The libtensorflowlite_flex_jni.so contains native functions that are originally meant for JNI to call, no C headers were included. Fortunately, there are only 3 simple functions that can be operated within the C API. We to implement the call sequences for the flex delegate by following the Java's implementation to our code.
+The libtensorflowlite_flex_jni.so contains native functions that are originally meant for JNI to call, no C headers were included. Fortunately, there are only 3 simple functions that can be operated within the C API. We implement the call sequences for the flex delegate by following the Java's implementation to our code.
 
 More details on String support:
 
