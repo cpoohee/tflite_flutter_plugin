@@ -1,13 +1,9 @@
-// Flex Additional codes
-
 import 'dart:ffi';
 
 import 'package:quiver/check.dart';
-import '../bindings/flex_delegate.dart';
+import '../bindings/delegates/flex_delegate.dart';
 import '../bindings/types.dart';
 import '../delegate.dart';
-
-//import 'dart:developer' as developer;
 
 /// Flex Delegate for Android
 class Flex_Delegate implements Delegate {
@@ -28,7 +24,6 @@ class Flex_Delegate implements Delegate {
     checkState(!_deleted,
         message: 'TfLiteFlex_delegate already deleted.');
 
-    //developer.log('tfLite_flex_deleteDelegate');
     tfLite_flex_deleteDelegate(_delegate);
     _deleted = true;
   }

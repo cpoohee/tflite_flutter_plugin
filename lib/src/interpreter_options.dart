@@ -5,7 +5,7 @@ import 'package:quiver/check.dart';
 import '../tflite_flutter.dart';
 import 'bindings/interpreter_options.dart';
 
-import 'bindings/flex_delegate.dart';
+import 'bindings/delegates/flex_delegate.dart';
 import 'delegates/flex_delegate.dart';
 
 import 'bindings/types.dart';
