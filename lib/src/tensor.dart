@@ -14,11 +14,6 @@ import 'util/list_shape_extension.dart';
 
 export 'bindings/types.dart' show TfLiteType;
 
-//ADDITIONAL CODES
-//import 'dart:developer' as developer;
-// END ADDITIONAL Decode
-
-
 /// TensorFlowLite tensor.
 class Tensor {
   final Pointer<TfLiteTensor> _tensor;
@@ -46,7 +41,7 @@ class Tensor {
 
   /// Quantization Params associated with the model, [only Android]
   QuantizationParams get params {
-    final ref = tfLiteTensorQuantizationParams(_tensor).ref;
+    final ref = tfLiteTensorQuantizationParams(_tensor);
     return QuantizationParams(ref.scale, ref.zeroPoint);
   }
 
@@ -142,36 +137,27 @@ class Tensor {
   }
 
   void setTo(Object src) {
-    // developer.log('Converting object to bytes');
-    // developer.log(src.toString());
     Uint8List bytes = _convertObjectToBytes(src);
 
     int size = bytes.length;
-    // developer.log('Size of object in bytes');
-    // developer.log(size.toString());
-    // developer.log(bytes.toString());
     final ptr = calloc<Uint8>(size);
     checkState(isNotNull(ptr), message: 'unallocated');
     final externalTypedData = ptr.asTypedList(size);
     externalTypedData.setRange(0, bytes.length, bytes);
 
-    // ADDITIONAL CODES
     // strings are dynamically sized, previously reshaped tensors dont allocate input buffer size
     // therefore we manually call tfLiteTensorRealloc
     int allocatedBytes = this.numBytes();
     if (allocatedBytes != bytes.length){
       if (_tensor != null){
-        //developer.log('Realloc happens');
-        //developer.log(_tensor.toString(),name:'before tensor address');
         tfLiteTensorRealloc(bytes.length,_tensor);
-        //developer.log(_tensor.toString(),name: 'after tensor address');
         // doesnt return TfLiteStatus, will still return normally if it fails to realloc
       }
       else{
         throw ArgumentError('Tensor Realloc Error: Tensor Object cannot be null!');
       }
     }
-    // END ADDITIONAL CODES
+
     checkState(tfLiteTensorCopyFromBuffer(_tensor, ptr.cast(), bytes.length) ==
         TfLiteStatus.ok);
     calloc.free(ptr);

@@ -1,16 +1,10 @@
-// Flex Additional codes
-
 import 'dart:ffi';
 
 import 'dlib_flex.dart';
 
 import 'types.dart';
 
-// iOS metal delegate bindings
-// ?? TODO??
-
 // android flex delegate bindings
-
 Pointer<TfLiteDelegate> Function()
 tfLite_flex_initTensorflow = tfliteflexlib
     .lookup<NativeFunction<_TfLite_flex_initTensorflow_native_t>>(

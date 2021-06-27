@@ -3,12 +3,8 @@
 import 'dart:typed_data';
 import 'list_shape_extension.dart';
 import 'package:tflite_flutter/src/bindings/types.dart';
-
-// ADDITIONAL CODES
 import 'dart:convert' show utf8;
 import 'dart:ffi';
-//import 'dart:developer' as developer;
-// END ADDITIONAL CODES
 
 class ByteConversionUtils {
   static Uint8List convertObjectToBytes(Object o, TfLiteType tfliteType) {
@@ -20,16 +16,12 @@ class ByteConversionUtils {
     }
     List<int> bytes = <int>[];
 
-    // ADDITIONAL CODES
     // special case for string
     if (tfliteType == TfLiteType.string){
-      //developer.log('Converting string:');
-      //developer.log(o.toString());
       bytes = _convertElementToBytes(o, tfliteType); // let _convertElementToBytes handle possible multiple strings
       return Uint8List.fromList(bytes);
     }
-    // END ADDITIONAL CODES
-
+    
     if (o is List) {
       for (var e in o) {
         bytes.addAll(convertObjectToBytes(e, tfliteType));
@@ -159,16 +151,13 @@ class ByteConversionUtils {
       }
       return list.reshape<int>(shape);
     }
-    /// ADDITIONAL CODES
     else if (tfliteType == TfLiteType.string){
       list.add(decodeTFStrings(bytes));
       return list.reshape<int>(shape);
     }
-    // END ADDITIONAL CODES
     throw UnsupportedError("$tfliteType is not Supported.");
   }
 
-  // ADDITIONAL CODES
   static List<int> encodeTFStrings(Object o){
     // Following String encoding as listed on
     // https://github.com/tensorflow/tensorflow/blob/master/tensorflow/lite/string_util.h
@@ -262,7 +251,5 @@ class ByteConversionUtils {
     }
     return decodedStrings;
   }
-
-// END ADDITIONAL CODES
 }
 

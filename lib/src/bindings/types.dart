@@ -40,48 +40,32 @@ class TFLGpuDelegateOptions extends Struct {
   @Int32()
   external int waitType;
 
+  // Allows execution of integer quantized models
+  @Int32()
+  external int enableQuantization;
+
   static Pointer<TFLGpuDelegateOptions> allocate(
-      bool allowPrecisionLoss, TFLGpuDelegateWaitType waitType) {
+    bool allowPrecisionLoss,
+    TFLGpuDelegateWaitType waitType,
+    bool enableQuantization,
+  ) {
     final result = calloc<TFLGpuDelegateOptions>();
     result.ref
       ..allowPrecisionLoss = allowPrecisionLoss ? 1 : 0
-      ..waitType = waitType.index;
+      ..waitType = waitType.index
+      ..enableQuantization = enableQuantization ? 1 : 0;
     return result;
   }
 }
 
 /// Wraps TfLiteGpuDelegateOptionsV2 for android gpu delegate
 class TfLiteGpuDelegateOptionsV2 extends Struct {
-  /// When set to zero, computations are carried out in maximal possible
-  /// precision. Otherwise, the GPU may quantify tensors, downcast values,
-  /// process in FP16 to increase performance. For most models precision loss is
-  /// warranted.
-  /// [OBSOLETE]: to be removed
   @Int32()
   external int isPrecisionLossAllowed;
 
-  /// Preference is defined in TfLiteGpuInferenceUsage.
   @Int32()
   external int inferencePreference;
 
-  // Ordered priorities provide better control over desired semantics,
-  // where priority(n) is more important than priority(n+1), therefore,
-  // each time inference engine needs to make a decision, it uses
-  // ordered priorities to do so.
-  // For example:
-  //   MAX_PRECISION at priority1 would not allow to decrease presision,
-  //   but moving it to priority2 or priority3 would result in F16 calculation.
-  //
-  // Priority is defined in TfLiteGpuInferencePriority.
-  // AUTO priority can only be used when higher priorities are fully specified.
-  // For example:
-  //   VALID:   priority1 = MIN_LATENCY, priority2 = AUTO, priority3 = AUTO
-  //   VALID:   priority1 = MIN_LATENCY, priority2 = MAX_PRECISION,
-  //            priority3 = AUTO
-  //   INVALID: priority1 = AUTO, priority2 = MIN_LATENCY, priority3 = AUTO
-  //   INVALID: priority1 = MIN_LATENCY, priority2 = AUTO,
-  //            priority3 = MAX_PRECISION
-  // Invalid priorities will result in error.
   @Int32()
   external int inferencePriority1;
   @Int32()
@@ -89,19 +73,70 @@ class TfLiteGpuDelegateOptionsV2 extends Struct {
   @Int32()
   external int inferencePriority3;
 
+  @Int64()
+  external int experimentalFlags;
+
+  @Int32()
+  external int maxDelegatedPartitions;
+
   static Pointer<TfLiteGpuDelegateOptionsV2> allocate(
       bool isPrecisionLossAllowed,
       TfLiteGpuInferenceUsage inferencePreference,
       TfLiteGpuInferencePriority inferencePriority1,
       TfLiteGpuInferencePriority inferencePriority2,
-      TfLiteGpuInferencePriority inferencePriority3) {
+      TfLiteGpuInferencePriority inferencePriority3,
+      int experimentalFlagsBitmask,
+      int maxDelegatePartitions) {
     final result = calloc<TfLiteGpuDelegateOptionsV2>();
     result.ref
       ..isPrecisionLossAllowed = isPrecisionLossAllowed ? 1 : 0
       ..inferencePreference = inferencePreference.index
       ..inferencePriority1 = inferencePriority1.index
       ..inferencePriority2 = inferencePriority2.index
-      ..inferencePriority3 = inferencePriority3.index;
+      ..inferencePriority3 = inferencePriority3.index
+      ..experimentalFlags = experimentalFlagsBitmask
+      ..maxDelegatedPartitions = maxDelegatePartitions;
+    return result;
+  }
+}
+
+/// Wraps TfLiteXNNPackDelegateOptions
+class TfLiteXNNPackDelegateOptions extends Struct {
+  @Int32()
+  external int numThreads;
+
+  static Pointer<TfLiteXNNPackDelegateOptions> allocate(int numThreads) {
+    final result = calloc<TfLiteXNNPackDelegateOptions>();
+    result.ref..numThreads = numThreads;
+    return result;
+  }
+}
+
+// Wraps TfLiteCoreMlDelegateOptions
+class TfLiteCoreMlDelegateOptions extends Struct {
+  @Int32()
+  external int enabledDevices;
+
+  @Int32()
+  external int coremlVersion;
+
+  @Int32()
+  external int maxDelegatedPartitions;
+
+  @Int32()
+  external int minNodesPerPartition;
+
+  static Pointer<TfLiteCoreMlDelegateOptions> allocate(
+      TfLiteCoreMlDelegateEnabledDevices enabledDevices,
+      int coremlVersion,
+      int maxDelegatedPartitions,
+      int minNodesPerPartition) {
+    final result = calloc<TfLiteCoreMlDelegateOptions>();
+    result.ref
+      ..enabledDevices = enabledDevices.index
+      ..coremlVersion = coremlVersion
+      ..maxDelegatedPartitions = maxDelegatedPartitions
+      ..minNodesPerPartition = minNodesPerPartition;
     return result;
   }
 }
@@ -174,4 +209,33 @@ enum TfLiteGpuInferencePriority {
 
   /// TFLITE_GPU_INFERENCE_PRIORITY_MIN_MEMORY_USAGE,
   minMemoryUsage,
+}
+
+/// Used to toggle experimental flags used in the delegate. Note that this is a
+/// bitmask, so the values should be 1, 2, 4, 8, ...etc.
+enum TfLiteGpuExperimentalFlags {
+  /// TFLITE_GPU_EXPERIMENTAL_FLAGS_NONE = 0,
+  none,
+
+  /// Enables inference on quantized models with the delegate.
+  /// NOTE: This is enabled in TfLiteGpuDelegateOptionsV2Default.
+  /// TFLITE_GPU_EXPERIMENTAL_FLAGS_ENABLE_QUANT = 1 << 0,
+  enableQuant,
+
+  /// Enforces execution with the provided backend.
+  // TFLITE_GPU_EXPERIMENTAL_FLAGS_CL_ONLY = 1 << 1,
+  clOnly,
+
+  /// TFLITE_GPU_EXPERIMENTAL_FLAGS_GL_ONLY = 1 << 2
+  glOnly,
+}
+
+enum TfLiteCoreMlDelegateEnabledDevices {
+  /// Create Core ML delegate only on devices with Apple Neural Engine.
+  ///
+  /// Returns nullptr otherwise.
+  TfLiteCoreMlDelegateDevicesWithNeuralEngine,
+
+  /// Always create Core ML delegate
+  TfLiteCoreMlDelegateAllDevices
 }

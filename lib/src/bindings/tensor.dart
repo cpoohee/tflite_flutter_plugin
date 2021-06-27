@@ -103,14 +103,14 @@ typedef _TfLiteTensorCopyToBuffer_native_t = /*TfLiteStatus*/ Int32 Function(
   Int32 outputDataSize,
 );
 
-Pointer<TfLiteQuantizationParams> Function(Pointer<TfLiteTensor> tensor)
+TfLiteQuantizationParams Function(Pointer<TfLiteTensor> tensor)
     tfLiteTensorQuantizationParams = tflitelib
         .lookup<NativeFunction<_TfLiteTensorQuantizationParams_native_t>>(
-            'TfLiteTensorQuantizationParamsPointer')
+            'TfLiteTensorQuantizationParams')
         .asFunction();
 
 typedef _TfLiteTensorQuantizationParams_native_t
-    = Pointer<TfLiteQuantizationParams> Function(Pointer<TfLiteTensor> tensor);
+    = TfLiteQuantizationParams Function(Pointer<TfLiteTensor> tensor);
 
 
 // ADDITIONAL CODES

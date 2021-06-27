@@ -13,11 +13,6 @@ import 'interpreter_options.dart';
 import 'model.dart';
 import 'tensor.dart';
 
-
-//ADDITIONAL CODES
-//import 'dart:developer' as developer;
-// END ADDITIONAL Decode
-
 /// TensorFlowLite interpreter for running inference on a model.
 class Interpreter {
   final Pointer<TfLiteInterpreter> _interpreter;
@@ -173,11 +168,6 @@ class Interpreter {
 
     var inputTensors = getInputTensors();
 
-    // for (int i = 0; i < inputTensors.length; i++){
-    //   developer.log('Given INPUT Tensor object');
-    //   developer.log(inputTensors[i].toString());
-    // }
-
     for (int i = 0; i < inputs.length; i++) {
       var tensor = inputTensors.elementAt(i);
       
@@ -194,31 +184,18 @@ class Interpreter {
     }
 
     inputTensors = getInputTensors();
-    // for (int i = 0; i < inputTensors.length; i++){
-    //   developer.log('INPUT allocated Tensor object');
-    //   developer.log(inputTensors[i].toString());
-    // }
 
     for (int i = 0; i < inputs.length; i++) {
       inputTensors.elementAt(i).setTo(inputs[i]);
     }
 
-    // for (int i = 0; i < inputTensors.length; i++){
-    //   developer.log('INPUT after set Tensor object');
-    //   developer.log(inputTensors.elementAt(i).toString());
-    // }
-
-    //developer.log('Invoke');
     var inferenceStartNanos = DateTime.now().microsecondsSinceEpoch;
     invoke();
     _lastNativeInferenceDurationMicroSeconds =
         DateTime.now().microsecondsSinceEpoch - inferenceStartNanos;
-    //developer.log('Done Invoke');
 
-    //developer.log('Get outputTensors after invoke');
     var outputTensors = getOutputTensors();
     for (var i = 0; i < outputTensors.length; i++) {
-      //developer.log(outputTensors[i].toString());
       outputTensors[i].copyTo(outputs[i]!);
     }
   }
@@ -253,9 +230,7 @@ class Interpreter {
 
   /// Resize input tensor for the given tensor index. `allocateTensors` must be called again afterward.
   void resizeInputTensor(int tensorIndex, List<int> shape) {
-    //developer.log('ResizeInput Tensor object');
     final dimensionSize = shape.length;
-    //developer.log(dimensionSize.toString(),name: 'dimSize:' );
     final dimensions = calloc<Int32>(dimensionSize);
     final externalTypedData = dimensions.asTypedList(dimensionSize);
     externalTypedData.setRange(0, dimensionSize, shape);
