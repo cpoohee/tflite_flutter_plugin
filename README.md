@@ -29,10 +29,10 @@ This is a fork of am15h's tflite_flutter_plugin. It is modded with flex delegate
 After running the script to add dynamic libraries, you have to manually add the libtensorflowlite_flex_jni.so into the respective ABI folders where the libtensorflowlite_c.so are located. The flex delegate will require both libtensorflowlite_c.so and libtensorflowlite_flex_jni.so.
 
 To run with Flex Delegate, you specify in the Interpreter option, for example:
-
-`var opt = InterpreterOptions()..useFlexDelegateAndroid = true;`
-
-`final interpreter = await Interpreter.fromAsset("MyFlexModel.tflite",options:opt);`
+```dart
+var opt = InterpreterOptions()..useFlexDelegateAndroid = true;
+final interpreter = await Interpreter.fromAsset("MyFlexModel.tflite",options:opt);
+```
 
 For a model with a string tensor input, and a string tensor output:
 ```dart
