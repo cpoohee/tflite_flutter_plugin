@@ -1,7 +1,8 @@
-name: tflite_flutter
-description: TensorFlow Lite Flutter plugin provides easy, flexible and fast Dart API to integrate TFLite models in flutter apps.
+name: tflite_flutter_flex_string_mod
+description: TensorFlow Lite Flutter plugin provides easy, flexible and fast Dart API to integrate TFLite models in flutter apps. Modded to work with Flex Ops/TF_SELECT_OPS and experimental strings input/ouput tensors.
 version: 0.8.0
-homepage: https://github.com/am15h/tflite_flutter_plugin
+homepage: https://github.com/cpoohee/tflite_flutter_plugin
+# A fork from the original: https://github.com/am15h/tflite_flutter_plugin
 
 environment:
   sdk: ">=2.12.0 <3.0.0"
@@ -13,6 +14,7 @@ dependencies:
   path: ^1.6.2
   quiver: ^3.0.0
   ffi: ^1.0.0
+  convert: ^3.0.1
 
 dev_dependencies:
   flutter_test:
