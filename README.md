@@ -22,6 +22,52 @@
 </a>
 </p>
 
+## Flex Delegate and String Mod
+
+This is a fork of am15h's tflite_flutter_plugin. It is modded with flex delegate support on Android platform. An experimental string input/output is also included. 
+
+After running the script to add dynamic libraries, you have to manually add the libtensorflowlite_flex_jni.so into the respective ABI folders where the libtensorflowlite_c.so are located. The flex delegate will require both libtensorflowlite_c.so and libtensorflowlite_flex_jni.so.
+
+To run with Flex Delegate, you specify in the Interpreter option, for example:
+
+`var opt = InterpreterOptions()..useFlexDelegateAndroid = true;`
+
+`final interpreter = await Interpreter.fromAsset("MyFlexModel.tflite",options:opt);`
+
+For a model with a string tensor input, and a string tensor output:
+```dart
+String inputStr = 'hello there';
+String tempout = '';
+
+var input = [inputStr];
+var output = [tempout];
+// inference
+interpreter.run(input, output);
+var prediction = output[0];
+```
+
+## More details
+
+More details on Flex support: 
+
+The libtensorflowlite_flex_jni.so contains native functions that are originally meant for JNI to call, no C headers were included. Fortunately, there are only 3 simple functions that can be operated within the C API. We to implement the call sequences for the flex delegate by following the Java's implementation to our code.
+
+More details on String support:
+
+The general flow for the C API interpreter's run function goes like this:
+- Get input tensor of the model
+- Resize input tensor from my inputs if needed
+- Allocate tensor
+- Set input tensor with values
+- Invoke
+- Get output tensor and return
+
+The string tensors are dynamically sized. The Allocate tensor step will still not provide the memory needed for a string. We therefore will need to call TfLiteTensorRealloc to dynamically allocate input memory for strings. This is implemented during setting of input values to tensor.
+
+TFLite String byte format:
+
+Dart Strings are encoded to bytes and similarly decoded in a format as specified in https://github.com/tensorflow/tensorflow/blob/master/tensorflow/lite/string_util.h
+
 ## Overview
 
 TensorFlow Lite Flutter plugin provides a flexible and fast solution for accessing TensorFlow Lite interpreter and performing inference. The API is similar to the TFLite Java and Swift APIs. It directly binds to TFLite C API making it efficient (low-latency). Offers acceleration support using NNAPI, GPU delegates on Android, and Metal delegate on iOS.
