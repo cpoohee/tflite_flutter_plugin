@@ -44,6 +44,7 @@ var output = [tempout];
 // inference
 interpreter.run(input, output);
 var prediction = output[0];
+interpreter.close();
 ```
 
 ## More details
