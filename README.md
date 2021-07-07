@@ -24,7 +24,7 @@
 
 ## Flex Delegate and String Mod
 
-This is a fork of am15h's tflite_flutter_plugin. It is modded with flex delegate support on Android platform. An experimental string input/output is also included. 
+This is a fork of am15h's tflite_flutter_plugin. It is modded with flex delegate support for the Android platform. An experimental string input/output is also included. 
 
 After running the script to add dynamic libraries, you have to manually add the libtensorflowlite_flex_jni.so into the respective ABI folders where the libtensorflowlite_c.so are located. The flex delegate will require both libtensorflowlite_c.so and libtensorflowlite_flex_jni.so.
 
