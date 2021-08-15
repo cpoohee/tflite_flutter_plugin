@@ -231,7 +231,14 @@ class Tensor {
     if (input == null) {
       return null;
     }
-    if (input is ByteBuffer || input is Uint8List) {
+    
+    if (input is Uint8List){
+      List<int> dimensions = [];
+      dimensions.add(input.length);
+      return dimensions;
+    }
+
+    if (input is ByteBuffer) {
       return null;
     }
 
