@@ -147,7 +147,7 @@ class ByteConversionUtils {
       return list.reshape<int>(shape);
     } else if (tfliteType == TfLiteType.int64) {
       for (var i = 0; i < bytes.length; i += 8) {
-        list.add(ByteData.view(bytes.buffer).getInt64(i));
+        list.add(ByteData.view(bytes.buffer).getInt64(i, Endian.little));
       }
       return list.reshape<int>(shape);
     }
