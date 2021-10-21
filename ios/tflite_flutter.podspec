@@ -28,4 +28,6 @@ TensorFlow Lite plugin for Flutter apps.
   s.xcconfig = { 'OTHER_LDFLAGS' => '-framework TensorFlowLiteC -all_load' }
   #s.xcconfig = { 'OTHER_LDFLAGS' => '-framework TensorFlowLiteSelectTfOps -all_load' }
   #s.xcconfig = { 'OTHER_LDFLAGS' => '-framework TensorFlowLiteC -force_load TensorFlowLiteSelectTfOps' }
+  s.xcconfig = { 'OTHER_LDFLAGS' => '-force_load ${PODS_ROOT}/../.symlinks/plugins/tflite_flutter/ios/TensorFlowLiteSelectTfOps.framework/TensorFlowLiteSelectTfOps' }
+  
 end
