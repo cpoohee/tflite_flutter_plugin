@@ -25,7 +25,7 @@ TensorFlow Lite plugin for Flutter apps.
   s.swift_version = '5.0'
   s.library = 'c++'
   # Fail early during build instead of not finding the library during runtime
-  #s.xcconfig = { 'OTHER_LDFLAGS' => '-framework TensorFlowLiteC -all_load' }
+  s.xcconfig = { 'OTHER_LDFLAGS' => '-framework TensorFlowLiteC -all_load' }
   #s.xcconfig = { 'OTHER_LDFLAGS' => '-framework TensorFlowLiteSelectTfOps -all_load' }
-  s.xcconfig = { 'OTHER_LDFLAGS' => '-framework TensorFlowLiteC -force_load TensorFlowLiteSelectTfOps' }
+  #s.xcconfig = { 'OTHER_LDFLAGS' => '-framework TensorFlowLiteC -force_load TensorFlowLiteSelectTfOps' }
 end
