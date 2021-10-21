@@ -28,6 +28,8 @@ TensorFlow Lite plugin for Flutter apps.
   #s.xcconfig = { 'OTHER_LDFLAGS' => '-framework TensorFlowLiteC -all_load' }
   #s.xcconfig = { 'OTHER_LDFLAGS' => '-framework TensorFlowLiteSelectTfOps -all_load' }
   #s.xcconfig = { 'OTHER_LDFLAGS' => '-framework TensorFlowLiteC -force_load TensorFlowLiteSelectTfOps' }
+  
+  #linking this way will cause the duplicate symbols bug. see issue-> https://github.com/tensorflow/tensorflow/issues/52042
   s.xcconfig = { 'OTHER_LDFLAGS' => '-force_load ${PODS_ROOT}/../.symlinks/plugins/tflite_flutter/ios/TensorFlowLiteSelectTfOps.framework/TensorFlowLiteSelectTfOps' }
   
 end
