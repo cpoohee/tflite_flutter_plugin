@@ -25,11 +25,11 @@ TensorFlow Lite plugin for Flutter apps.
   s.swift_version = '5.0'
   s.library = 'c++'
   # Fail early during build instead of not finding the library during runtime
-  #s.xcconfig = { 'OTHER_LDFLAGS' => '-framework TensorFlowLiteC -all_load' }
+  s.xcconfig = { 'OTHER_LDFLAGS' => '-framework TensorFlowLiteC -all_load' }
   #s.xcconfig = { 'OTHER_LDFLAGS' => '-framework TensorFlowLiteSelectTfOps -all_load' }
   #s.xcconfig = { 'OTHER_LDFLAGS' => '-framework TensorFlowLiteC -force_load TensorFlowLiteSelectTfOps' }
   
-  #linking this way will cause the duplicate symbols bug. see issue-> https://github.com/tensorflow/tensorflow/issues/52042
-  s.xcconfig = { 'OTHER_LDFLAGS' => '-force_load ${PODS_ROOT}/../.symlinks/plugins/tflite_flutter/ios/TensorFlowLiteSelectTfOps.framework/TensorFlowLiteSelectTfOps' }
+  #linking with this recommended way will cause the duplicate symbols bug. see issue-> https://github.com/tensorflow/tensorflow/issues/52042
+  #s.xcconfig = { 'OTHER_LDFLAGS' => '-force_load ${PODS_ROOT}/../.symlinks/plugins/tflite_flutter/ios/TensorFlowLiteSelectTfOps.framework/TensorFlowLiteSelectTfOps' }
   
 end
